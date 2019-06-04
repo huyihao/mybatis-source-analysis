@@ -75,7 +75,7 @@ class DOMTreeFrame extends JFrame {
 	 */
 	public void openFile() {
 		JFileChooser chooser = new JFileChooser();
-		chooser.setCurrentDirectory(new File("F:\\mybatis\\rewriteSource\\mybatis-source-analysis\\XML-Basic\\src"));
+		chooser.setCurrentDirectory(new File("F:\\mybatis\\rewriteSource\\mybatis-source-analysis\\XML-Basic\\src\\xml\\study\\dom\\treeviewer"));
 		chooser.setFileFilter(new FileNameExtensionFilter("XML files", "xml"));
 		int r = chooser.showOpenDialog(this);
 		// 如果没有选中文件，则不做处理直接返回
