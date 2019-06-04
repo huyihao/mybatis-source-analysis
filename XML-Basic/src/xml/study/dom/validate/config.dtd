@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT font (name, size)>
+<!ATTLIST font style (plain|bold|italic|bold-italic) "plain">
+
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT size (#PCDATA)>
+<!ATTLIST size unit CDATA #IMPLIED>
