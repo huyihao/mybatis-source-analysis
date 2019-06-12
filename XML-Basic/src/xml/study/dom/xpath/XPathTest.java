@@ -104,4 +104,6 @@ public class XPathTest {
 		Double price = (Double) xpath.evaluate("//book[@year=2005]/price/text()", doc, XPathConstants.NUMBER);
 		System.out.println(price);	
 	}
+	
+	
 }
