@@ -8,10 +8,13 @@ import java.util.Properties;
 import org.apache.ibatis.parsing.PropertyParser;
 import org.apache.ibatis.parsing.upd.PropertyParserUpd;
 
+/**
+ * 属性解析器测试案例
+ */
 public class PropertyParserTest {
 	public static void main(String[] args) throws Exception {
 		// 1. 加载properties文件到Properties对象中
-		InputStream inputStream = new BufferedInputStream(new FileInputStream("src/main/java/jdbc.properties"));
+		InputStream inputStream = new BufferedInputStream(new FileInputStream("src/main/java/org/apache/ibatis/parsing/test/jdbc.properties"));
 		Properties variables = new Properties();
 		variables.load(inputStream);
 		System.out.println(variables.getProperty("database.username"));

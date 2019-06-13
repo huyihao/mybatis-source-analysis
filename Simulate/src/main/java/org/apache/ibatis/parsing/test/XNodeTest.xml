@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration attr1="haha" attr2="hehe">
+	<evalType name="name1" value="value1">
+		<evalString1>evalString1_text</evalString1>
+		<evalString2>${evalString2}</evalString2>
+		<evalBoolean>false</evalBoolean>
+		<evalDouble>3.14156</evalDouble>
+		<evalNode id="id">Node</evalNode>
+		<evalNode2 id="id" value="value" property="property">Node</evalNode2>
+		<evalNode3 value="value" property="property">Node</evalNode3>
+		<evalNode4 property="property">Node</evalNode4>
+		<evalInt>100</evalInt>
+		<evalLong>20000000000</evalLong>
+		<evalFloat>6.667</evalFloat>
+	</evalType>
+	
+	<getTypeAttribute name="name2" value="value2">
+		<getStringAttribute value="string"/>
+		<getBooleanAttribute value="false"/>
+		<getIntAttribute value="100"/>
+		<getLongAttribute value="2000000000"/>
+		<getDoubleAttribute value="3.1415"/>
+		<getFloatAttribute value="6.667"/>
+		<style font="Aharoni"/>
+	</getTypeAttribute>
+	
+</configuration>

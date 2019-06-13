@@ -3,6 +3,7 @@ package org.apache.ibatis.parsing;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -15,6 +16,8 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
@@ -245,11 +248,31 @@ public class XPathParser {
 		return (Double) evaluate(expression, root, XPathConstants.NUMBER);
 	}
 	
-//	public List<XNode> evalNode(String expression) {
-//		
-//	}
+	public List<XNode> evalNodes(String expression) {
+		return evalNodes(document, expression);
+	}
 	
+	public List<XNode> evalNodes(Object root, String expression) {
+		List<XNode> xnodes = new ArrayList<XNode>();
+		NodeList nodes = (NodeList) evaluate(expression, root, XPathConstants.NODESET);
+		for (int i = 0; i < nodes.getLength(); i++) {
+			xnodes.add(new XNode(this, nodes.item(i), variables));
+		}
+		return xnodes;
+	}
 	
+	public XNode evalNode(String expression) {
+		return evalNode(document, expression);
+	}
+	
+	public XNode evalNode(Object root, String expression) {
+		Node node = (Node) evaluate(expression, root, XPathConstants.NODE);
+		if (node == null) {
+			return null;
+		} else {
+			return new XNode(this, node, variables);
+		}
+	}
 	
 	private Object evaluate(String expression, Object root, QName returnType) {
 		try {

@@ -3,5 +3,7 @@
 
 ## 提交记录
 
-* 1. 使用DOM解析XML的示例
-* 2. 使用XPath查询XML的示例
+* (1) 使用DOM解析XML的示例
+* (2) 使用XPath查询XML的示例
+* (3) 构建通用占位符解析器GenericTokenParser及其优化
+* (4) 构建包装了Node节点类XNode
