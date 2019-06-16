@@ -2,8 +2,6 @@ package org.apache.ibatis.parsing;
 
 /**
  * 通用占位符解析器
- * @author ahao
- *
  */
 public class GenericTokenParser {
 	
