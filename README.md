@@ -8,3 +8,4 @@
 * (3) 构建通用占位符解析器GenericTokenParser及其优化
 * (4) 构建包装了Node节点类XNode
 * (5) 构建反射模块中的核心类Reflector
+* (6) 构建反射模块中解析字段、方法返回值、方法参数类型的类TypeParameterResolver

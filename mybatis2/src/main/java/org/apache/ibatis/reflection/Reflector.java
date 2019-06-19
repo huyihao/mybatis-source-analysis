@@ -1,10 +1,14 @@
 package org.apache.ibatis.reflection;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.ReflectPermission;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -161,9 +165,14 @@ public class Reflector {
 	}
 	
 	private void addGetMethod(String name, Method method) {
+		// 检测属性名是否合法
 		if (isValidPropertyName(name)) {
+			// 将属性名以及对应的MethodInvoker对象添加到getMethods集合中
 			getMethods.put(name, new MethodInvoker(method));
-			getTypes.put(name, method.getReturnType());
+			// 获取返回值类型的真实类型(因为有可能带泛型)
+			Type returnType = TypeParameterResolver.resolveReturnType(method, type);
+			// 将属性名称及其getter方法的返回值类型添加到getTypes集合中保存
+			getTypes.put(name, typeToClass(returnType));
 		}
 	}
 	
@@ -220,7 +229,9 @@ public class Reflector {
 	private void addSetMethod(String name, Method method) {
 		if (isValidPropertyName(name)) {
 			setMethods.put(name, new MethodInvoker(method));
-			setTypes.put(name, method.getParameterTypes()[0]);
+			// 因为通过反射获取setter方法参数类型时已经过滤了只取一个参数的方法，所以这里获得的数组长度肯定为1
+			Type[] paramTypes = TypeParameterResolver.resolveParamTypes(method, type);
+			setTypes.put(name, typeToClass(paramTypes[0]));
 		}
 	}
 	
@@ -266,17 +277,40 @@ public class Reflector {
 	private void addSetField(Field field) {
 		if (isValidPropertyName(field.getName())) {
 			setMethods.put(field.getName(), new SetFieldInvoker(field));
-			setTypes.put(field.getName(), field.getType());
+			Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
+			setTypes.put(field.getName(), typeToClass(fieldType));
 		}
 	}
 	
 	private void addGetField(Field field) {
 		if (isValidPropertyName(field.getName())) {
 			getMethods.put(field.getName(), new GetFieldInvoker(field));
-			getTypes.put(field.getName(), field.getType());
+			Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
+			setTypes.put(field.getName(), typeToClass(fieldType));
 		}
 	}
  	
+	private Class<?> typeToClass(Type src) {
+		Class<?> result = null;
+		if (src instanceof Class) {
+			result = (Class<?>) result;
+		} else if (src instanceof ParameterizedType) {
+			result = (Class<?>) ((ParameterizedType) src).getRawType();
+		} else if (src instanceof GenericArrayType) {
+			Type componentType = ((GenericArrayType) src).getGenericComponentType();
+			if (componentType instanceof Class) {
+				result = Array.newInstance((Class<?>) componentType, 0).getClass();
+			} else {
+				Class<?> componentClass = typeToClass(componentType);
+				result = Array.newInstance((Class<?>) componentClass, 0).getClass();
+			}
+		}
+		if (result == null) {
+			result = Object.class;
+		}
+		return result;
+	}
+	
 	private boolean isValidPropertyName(String name) {
 		return !(name.startsWith("$") || "serialVersionUID".equals(name) || "class".equals(name));
 	}
