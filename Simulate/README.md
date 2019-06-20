@@ -12,3 +12,4 @@
 * (2) 新增XNode测试案例
 * (3) 新增Reflector测试案例
 * (4) 新增TypeParameterResolver测试案例
+* (5) 新增PropertyTokenizer测试案例

@@ -10,6 +10,7 @@ import org.apache.ibatis.reflection.Reflector;
 import org.apache.ibatis.reflection.property.PropertyNamer;
 import org.apache.ibatis.reflection.test.helper.ReflectorDemoClass;
 import org.apache.ibatis.reflection.test.helper.ReflectorDemoClassWithoutDefaultConstructor;
+import org.apache.ibatis.reflection.test.helper.ReflectorSubClass;
 
 public class ReflectorTest {
 	public static void main(String[] args) {
@@ -54,8 +55,43 @@ public class ReflectorTest {
 		System.out.println();
 		// [end]
 		
+		// 4. addSetMethods()的分解测试		
 		// 对addSetMethods()的分解测试，跟对addGetMethods的分解测试大同小异
 		// 唯一有点不同的是resolveSetterConflict()方法，它会判断同一个属性的getter的返回值跟setter的的参数值类型是否一致，不一致则跳过，最终在setter方法列表里找不到一致的则抛出异常
+		
+		// 5. 对Reflector整体的一个使用测试，由于Reflector有很多私有成员，测试的时候最好多debug，才能看到其变化的过程，更好地理解Reflector的工作机制
+		System.out.println("【printReflectorInfo】");
+		Reflector reflector = new Reflector(ReflectorSubClass.class);
+		printReflectorInfo(reflector);
+	}
+	
+	public static void printReflectorInfo(Reflector reflector) {
+		System.out.println("[type] " + reflector.getType());
+		System.out.println("[defaultConstructor] " + reflector.getDefaultConstructor());
+		
+		System.out.println("[readablePropertyNames & getTypes]");
+		String[] readablePropertyNames = reflector.getGetablePropertyNames();
+		for (int i = 0; i < readablePropertyNames.length; i++) {
+			String propName = readablePropertyNames[i];
+			System.out.println("readablePropertyNames[" + i + "] = " + propName +
+							   ", getTypes[" + i + "] = " + reflector.getGetterType(propName) + 
+							   ", hasGetter ? " + reflector.hasGetter(propName));
+		}
+		System.out.println();
+		
+		System.out.println("[writeablePropertyNames & setTypes]");		
+		String[] writeablePropertyNames = reflector.getSetablePropertyNames();
+		for (int i = 0; i < writeablePropertyNames.length; i++) {
+			String propName = writeablePropertyNames[i];
+			System.out.println("writeablePropertyNames[" + i + "] = " + propName + 
+							   ", setTypes[" + i + "] = " + reflector.getSetterType(propName) + 
+							   ", hasSetter ? " + reflector.hasSetter(propName));
+		}
+		// 不能通过addGetMethods()和addSetMethods()方法获取到的属性，在子类和父类中都没有getter/setter
+		// Reflector是通过沿着继承链通过反射获取所有属性 - 有getter/setter的属性
+		// 再添加经过筛选的属性到setMethods、getMethods: 这使得没有getter、setter也能通过反射获取和设置对象中某个没有getter、setter属性的值
+		// 当然，这种反射能力是有冗余的，对于子类来说，父类中声明的private属性是不可见的，但是现在我们可以通过反射获取和设置其属性值;
+		// 而父类中声明的非private属性，子类都是可以正常访问的，这时候不需要反射，一个正常的子类对象也可以访问该属性，但是统一形式能省去很多不必要的麻烦
 	}
 	
 	public static void addDefaultConstouctorTest() {
@@ -171,7 +207,31 @@ public class ReflectorTest {
 		ReflectorPrivateMethod.resolveGetterConflict(conflictingGetters);
 	}
 	
-	public static void resolveSetterConflictTest() {
+	public static Map<String, List<Method>> addMethodConflictTest2() {
+		Class<?> clazz = ReflectorDemoClass.class;
+		Map<String, List<Method>> conflictingSetters = new HashMap<String, List<Method>>();
+		Method[] methods = ReflectorPrivateMethod.getClassMethods(clazz);
+		for (Method method : methods) {
+			String name = method.getName();
+			if (name.startsWith("set") && name.length() > 3) {
+				name = PropertyNamer.methodToProperty(name);
+				ReflectorPrivateMethod.addMethodConflict(conflictingSetters, name, method);
+			}
+		}
 		
+		for (String propName : conflictingSetters.keySet()) {
+			System.out.println("propName = " + propName);
+			List<Method> methodlist = conflictingSetters.get(propName);
+			System.out.print("methodList = ");
+			for (int i = 0; i < methodlist.size(); i++) {
+				if (i != 0) {
+					System.out.println("             " + methodlist.get(i));
+				} else {
+					System.out.println(methodlist.get(i));
+				}
+			}
+			System.out.println();
+		}
+		return conflictingSetters;		
 	}
 }

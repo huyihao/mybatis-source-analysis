@@ -26,9 +26,17 @@ import org.apache.ibatis.reflection.property.PropertyNamer;
 
 /**
  * Reflector类缓存了反射操作需要使用的类的元信息，使得属性名和getter/setter之间的映射更加简单
+ * 
  * 提供下以下功能:
  * (1) 类中可读属性集合
  * (2) 类中可写属性集合
+ * (3) 判断类中是否存在某可读属性
+ * (4) 判断类中是否存在某可写属性
+ * (5) 判断类中是否存在某属性
+ * (5) 获取类中某可读属性的类型
+ * (6) 获取类中某可写属性的类型
+ * (7) 通过反射获取类的对象实例某属性值
+ * (8) 通过反射设置类的对象实例某属性值
  * 
  */
 public class Reflector {
@@ -270,7 +278,7 @@ public class Reflector {
 			}
 		}
 		if (clazz.getSuperclass() != null) {   // 沿着继承链往上追溯  
-			clazz = clazz.getSuperclass();
+			addFields(clazz.getSuperclass());
 		}
 	}
 	
@@ -286,7 +294,7 @@ public class Reflector {
 		if (isValidPropertyName(field.getName())) {
 			getMethods.put(field.getName(), new GetFieldInvoker(field));
 			Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
-			setTypes.put(field.getName(), typeToClass(fieldType));
+			getTypes.put(field.getName(), typeToClass(fieldType));
 		}
 	}
  	

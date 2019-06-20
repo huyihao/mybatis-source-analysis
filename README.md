@@ -9,3 +9,4 @@
 * (4) 构建包装了Node节点类XNode
 * (5) 构建反射模块中的核心类Reflector
 * (6) 构建反射模块中解析字段、方法返回值、方法参数类型的类TypeParameterResolver
+* (7) 构建属性表达式解析工具类PropertyTokenizer
