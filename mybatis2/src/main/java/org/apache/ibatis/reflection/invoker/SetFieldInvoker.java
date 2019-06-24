@@ -15,7 +15,7 @@ public class SetFieldInvoker implements Invoker {
 	
 	@Override
 	public Object invoke(Object target, Object[] args) throws IllegalAccessException, InvocationTargetException {
-		field.set(target, args);
+		field.set(target, args[0]);
 		return null;
 	}
 

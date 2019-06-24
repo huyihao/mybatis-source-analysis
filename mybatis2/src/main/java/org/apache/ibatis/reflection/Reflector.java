@@ -301,7 +301,7 @@ public class Reflector {
 	private Class<?> typeToClass(Type src) {
 		Class<?> result = null;
 		if (src instanceof Class) {
-			result = (Class<?>) result;
+			result = (Class<?>) src;
 		} else if (src instanceof ParameterizedType) {
 			result = (Class<?>) ((ParameterizedType) src).getRawType();
 		} else if (src instanceof GenericArrayType) {
@@ -481,6 +481,6 @@ public class Reflector {
 	}
 	
 	public String findPropertyName(String name) {
-		return caseInsensitivePropertyMap.get(name.toLowerCase(Locale.ENGLISH));
+		return caseInsensitivePropertyMap.get(name.toUpperCase(Locale.ENGLISH));
 	}
 }
