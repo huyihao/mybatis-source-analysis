@@ -14,3 +14,4 @@
 * (4) 新增TypeParameterResolver测试案例
 * (5) 新增PropertyTokenizer测试案例
 * (6) 新增MetaClass的测试案例
+* (7) 新增MetaObject的测试案例

@@ -11,3 +11,4 @@
 * (6) 构建反射模块中解析字段、方法返回值、方法参数类型的类TypeParameterResolver
 * (7) 构建属性表达式解析工具类PropertyTokenizer
 * (8) 构建可解析属性表达式并获取指定属性描述信息的类MetaClass
+* (9) 构建可根据对象类型获取对象的类元信息、解析属性表达式、获取设置属性值的类MetaObject

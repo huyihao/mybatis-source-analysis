@@ -2,6 +2,9 @@ package org.apache.ibatis.exceptions;
 
 // 反射异常
 public class ReflectionException extends PersistenceException {
+
+	private static final long serialVersionUID = 6434672459698787198L;
+
 	public ReflectionException() {
 		super();
 	}
