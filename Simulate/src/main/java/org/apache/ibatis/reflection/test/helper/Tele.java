@@ -36,4 +36,9 @@ public class Tele {
 	public void setNum(String num) {
 		this.num = num;
 	}
+	
+	@Override
+	public String toString() {
+		return "{ country:" + country + ", type:" + type + ", num:" + num + " }";
+	}
 }

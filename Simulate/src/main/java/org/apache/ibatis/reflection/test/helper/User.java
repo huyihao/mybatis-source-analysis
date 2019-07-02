@@ -7,6 +7,7 @@ public class User {
 	private String id;
 	private Tele tele;
 	private List<Order> orders;
+	private Tele phone;
 	
 	public User() {}
 	
@@ -45,5 +46,13 @@ public class User {
 			orders = new ArrayList<Order>();
 		}
 		orders.add(order);
+	}
+
+	public Tele getPhone() {
+		return phone;
+	}
+
+	public void setPhone(Tele phone) {
+		this.phone = phone;
 	}
 }

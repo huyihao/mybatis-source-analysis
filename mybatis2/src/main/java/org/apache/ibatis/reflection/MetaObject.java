@@ -9,6 +9,8 @@ import org.apache.ibatis.reflection.ReflectorFactory;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.apache.ibatis.reflection.wrapper.BeanWrapper;
+import org.apache.ibatis.reflection.wrapper.CollectionWrapper;
+import org.apache.ibatis.reflection.wrapper.MapWrapper;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapper;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
 
@@ -46,8 +48,10 @@ public class MetaObject {
 			this.objectWrapper = objectWrapperFactory.getWrapperFor(this, object);
 		} else if (object instanceof Map) {
 			// 若原始对象为Map类型，则创建MapWrapper对象
+			this.objectWrapper = new MapWrapper(this, (Map) object);
 		} else if (object instanceof Collection) {
 			// 若原始对象为Collection类型，则创建CollectionWrapper对象
+			this.objectWrapper = new CollectionWrapper(this, (Collection) object);
 		} else {
 			// 若原始对象是普通的JavaBean对象，则创建BeanWrapper对象
 			this.objectWrapper = new BeanWrapper(this, object);

@@ -36,4 +36,9 @@ public class Order {
 		}
 		items.add(item);
 	}
+	
+	@Override
+	public String toString() {
+		return "{ id:" + id + ", items:" + items + " }";
+	}
 }

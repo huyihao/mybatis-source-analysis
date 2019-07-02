@@ -37,7 +37,7 @@ public abstract class BaseWrapper implements ObjectWrapper {
 	 */
 	protected Object getCollectionValue(PropertyTokenizer prop, Object collection) {
 		if (collection instanceof Map) {
-			return ((Map) collection).get(prop.getName());
+			return ((Map) collection).get(prop.getIndex());
 		} else {
 			int i = Integer.valueOf(prop.getIndex());
 			if (collection instanceof List) {
