@@ -2,10 +2,10 @@ package org.apache.ibatis.reflection.wrapper;
 
 import java.util.List;
 
-import org.apache.ibatis.exceptions.ReflectionException;
 import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.invoker.Invoker;

@@ -12,4 +12,5 @@
 * (7) 构建属性表达式解析工具类PropertyTokenizer
 * (8) 构建可解析属性表达式并获取指定属性描述信息的类MetaClass
 * (9) 构建可根据对象类型获取对象的类元信息、解析属性表达式、获取设置属性值的类MetaObject
-* (9) 构建对象包装类BeanWrapper、MapWrapper、CollectionWrapper，分别包装普通JavaBean、Map、Collection类型对象
+* (10) 构建对象包装类BeanWrapper、MapWrapper、CollectionWrapper，分别包装普通JavaBean、Map、Collection类型对象
+* (11) 构建类型转换器基础接口TypeHandler、解析类型引用的抽象类TypeReference、类型转换器基类BaseTypeHandler，所有类型的类型转换器       

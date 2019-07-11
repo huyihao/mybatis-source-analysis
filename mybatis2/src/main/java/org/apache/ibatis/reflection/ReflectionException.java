@@ -1,4 +1,6 @@
-package org.apache.ibatis.exceptions;
+package org.apache.ibatis.reflection;
+
+import org.apache.ibatis.exceptions.PersistenceException;
 
 // 反射异常
 public class ReflectionException extends PersistenceException {

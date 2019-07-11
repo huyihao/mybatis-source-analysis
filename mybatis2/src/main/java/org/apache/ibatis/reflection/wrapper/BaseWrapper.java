@@ -3,8 +3,8 @@ package org.apache.ibatis.reflection.wrapper;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ibatis.exceptions.ReflectionException;
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**

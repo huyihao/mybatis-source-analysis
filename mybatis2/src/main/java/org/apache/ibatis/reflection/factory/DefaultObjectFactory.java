@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.ibatis.exceptions.ReflectionException;
+import org.apache.ibatis.reflection.ReflectionException;
 
 public class DefaultObjectFactory implements ObjectFactory, Serializable {
 

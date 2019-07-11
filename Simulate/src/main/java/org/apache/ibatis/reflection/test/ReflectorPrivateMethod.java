@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ibatis.exceptions.ReflectionException;
+import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.invoker.MethodInvoker;
 
 // 本类用来辅助测试Reflector中的一些私有方法，简单拷贝代码并修改可见性修饰符为public

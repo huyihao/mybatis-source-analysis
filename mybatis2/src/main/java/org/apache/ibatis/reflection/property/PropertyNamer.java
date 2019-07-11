@@ -2,7 +2,7 @@ package org.apache.ibatis.reflection.property;
 
 import java.util.Locale;
 
-import org.apache.ibatis.exceptions.ReflectionException;
+import org.apache.ibatis.reflection.ReflectionException;
 
 public class PropertyNamer {
 	// 源码写法

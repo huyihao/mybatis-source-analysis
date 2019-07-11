@@ -1,7 +1,7 @@
 package org.apache.ibatis.reflection.wrapper;
 
-import org.apache.ibatis.exceptions.ReflectionException;
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.ReflectionException;
 
 // 默认实现了ObjectWrapperFactory接口的类，正常情况下本类不应该被调用到
 public class DefaultObjectWrapperFactory implements ObjectWrapperFactory {
