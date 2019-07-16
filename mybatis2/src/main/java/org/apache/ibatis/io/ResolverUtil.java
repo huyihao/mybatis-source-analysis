@@ -6,6 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.ibatis.logging.Log;
+import org.apache.ibatis.logging.LogFactory;
+
 /**
  * 【源码注释翻译】
  * <p>ResolverUtil用来定位满足任何情况下在classpth中可用的类。
@@ -38,6 +41,8 @@ import java.util.Set;
  * 	   筛选某个/多个包中所有类中属于某种类的类的集合
  */
 public class ResolverUtil<T> {
+	
+	private static final Log log = LogFactory.getLog(ResolverUtil.class);
 	
 	public static interface Test {
 		boolean matches(Class<?> type);
@@ -124,10 +129,13 @@ public class ResolverUtil<T> {
 		return this;
 	}
 	
+	// 找到包下满足Test匹配的类，并加入到matches集合中
 	public ResolverUtil<T> find(Test test, String packageName) {
 		String path = getPackagePath(packageName);
 		
 		try {
+			// VFS会根据包名找到包下所有类的路径名，然后返回一个列表
+			// eg: [com/learn/ssm/chapter3/pojo/Role.class, ...]
 			List<String> children = VFS.getInstance().list(path);
 			for (String child : children) {
 				if (child.endsWith(".class")) {
@@ -135,7 +143,7 @@ public class ResolverUtil<T> {
 				}
 			}
 		} catch (IOException ioe) {
-			// TODO: handle exception
+			log.error("Could not read package: " + packageName, ioe);
 		}
 		
 		return this;
@@ -156,13 +164,16 @@ public class ResolverUtil<T> {
 			//  => com.learn.ssm.chapter3.pojo.Role
 			String externalName = fqn.substring(0, fqn.indexOf('.')).replace('/', '.');
 			ClassLoader loader = getClassLoader();
+			if (log.isDebugEnabled()) {
+				log.debug("Checking to see if class " + externalName + " matches criteria [" + test + "]");
+			}
 			
 			Class<?> type = loader.loadClass(externalName);
 			if (test.matches(type)) {
 				matches.add((Class<T>) type);
 			}
 		} catch (Throwable t) {
-			
+			log.warn("Could not examine class '" + fqn + "'" + " due to a " + t.getClass().getName() + " with message: " + t.getMessage());
 		}
 	}
 }
