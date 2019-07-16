@@ -14,6 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.ibatis.io.Resources;
 
+/**
+ * TypeHandlerRegistry提供了以下功能:
+ * 1) register系列重载方法，注册Java类型与JDBC类型、类型转换器之间的映射关系
+ * 2) hasTypeHandler系列重载方法，支持通过Java类型、JDBC类型、类型应用TypeReference判断是否有对应的类型转换器的功能
+ * 3) getTypeHandler系列重载方法，支持通过Java类型、JDBC类型、类型应用TypeReference获取对应的转换器的功能
+ */
 public class TypeHandlerRegistry {
 	// 核心字段
 	// 记录JdbcType与TypeHandler之间的对应关系，其中JdbcType是一个枚举类型，它定义对应的JDBC类型

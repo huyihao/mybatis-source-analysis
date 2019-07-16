@@ -15,3 +15,5 @@
 * (10) 构建对象包装类`BeanWrapper`、`MapWrapper`、`CollectionWrapper`，分别包装普通JavaBean、Map、Collection类型对象
 * (11) 构建类型转换器基础接口`TypeHandler`、解析类型引用的抽象类`TypeReference`、类型转换器基类`BaseTypeHandler`，所有类型的类型转换器
 * (12) 构建类型转换器注册器`TypeHandlerRegistry`，注册器提供了常用类型转换器的注册、存在判断和获取的功能
+* (13) 构建资源加载类`Resources`，可通过资源路径(一般是文件路径)、网络URL路径去加载得到资源，`Resources`依赖`ClassLoaderWrapper`将资源转化为各种格式
+* (14) 构建类别名注册器`TypeAliasRegistry`，支持对单个类指定或默认别名注册，也支持多单个或多个包中的所有特定类进行别名注册(注册的别名全部都是默认的简单小写类名)
