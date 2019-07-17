@@ -19,3 +19,4 @@
 * (14) 构建类别名注册器`TypeAliasRegistry`，支持对单个类指定或默认别名注册，也支持多单个或多个包中的所有特定类进行别名注册(注册的别名全部都是默认的简单小写类名)
 * (15) 构建日志模块，定义框架使用的统一`Log`接口，使用适配器模式来适配包装不同的日志框架，在`LogFactory`中完成功能组装加载适配器，mybatis的使用日志时直接使用`LogFactory`创建`Log`对象
 * (16) 构建JDBC调试代理类，`BaseJdbcLogger`是代理类的抽象基类，定义了打印SQL日志时的一些公共操作，实现的代理子类有`ConnectionLogger`、`PreparedStatementLogger`、`StatementLogger`、`ResultSetLogger`
+* (17) 构建资源加载模块`ResolverUtil`根据指定条件查找指定包下的类，依赖于`VFS`找到类的路径，`VFS`有两个实现类`DefaultVFS`、`JBoss6VFS`
