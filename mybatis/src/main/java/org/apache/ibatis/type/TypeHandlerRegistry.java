@@ -3,6 +3,7 @@ package org.apache.ibatis.type;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -10,8 +11,10 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.io.Resources;
 
 /**
@@ -251,7 +254,14 @@ public class TypeHandlerRegistry {
 	// [end]
 	
 	public void register(String packageName) {
-		// 涉及到VFS文件解析。先留空
+		ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<Class<?>>();
+		resolverUtil.find(new ResolverUtil.IsA(TypeHandler.class), packageName);
+		Set<Class<? extends Class<?>>> handlerSet = resolverUtil.getClasses();
+		for (Class<?> type : handlerSet) {
+			if (!type.isAnonymousClass() && !type.isInterface() && !Modifier.isAbstract(type.getModifiers())) {
+				register(type);
+			}
+		}
 	}
 	
 	// (handler class)  

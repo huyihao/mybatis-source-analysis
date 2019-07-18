@@ -29,7 +29,7 @@ public abstract class VFS {
 	
 	@SuppressWarnings("unchecked")
 	public static VFS getInstance() {
-		if (instance == null) {
+		if (instance != null) {
 			return instance;
 		}
 		

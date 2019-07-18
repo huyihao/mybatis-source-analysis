@@ -1,6 +1,9 @@
 # mybatis-source-analysis
 本仓库用来存放解读`mybatis`源码中用到的一些技术的使用示例，对源码进行详细的注释，以及通过分析重写一步步演化`mybatis`系统的构建过程！
 
+## 版本说明
+mybatis-3.4.1
+
 ## 提交记录
 
 * (1) 使用DOM解析XML的示例
@@ -20,3 +23,4 @@
 * (15) 构建日志模块，定义框架使用的统一`Log`接口，使用适配器模式来适配包装不同的日志框架，在`LogFactory`中完成功能组装加载适配器，mybatis的使用日志时直接使用`LogFactory`创建`Log`对象
 * (16) 构建JDBC调试代理类，`BaseJdbcLogger`是代理类的抽象基类，定义了打印SQL日志时的一些公共操作，实现的代理子类有`ConnectionLogger`、`PreparedStatementLogger`、`StatementLogger`、`ResultSetLogger`
 * (17) 构建资源加载模块`ResolverUtil`根据指定条件查找指定包下的类，依赖于`VFS`找到类的路径，`VFS`有两个实现类`DefaultVFS`、`JBoss6VFS`
+* (18) 构建数据源模块，使用工厂方法模式，实现非连接池数据源工厂`UnpooledDataSourceFactory`创建非连接池数据源`UnpooledDataSource`，带连接池数据源工厂`PooledDataSourceFactory`创建数据源连接池`PooledDataSource`
