@@ -39,8 +39,8 @@
     
     <dependency>
       <groupId>org.mybatis2</groupId>
-	  <artifactId>mybatis2</artifactId>
-	  <version>0.0.1-SNAPSHOT</version>      
+	  <artifactId>mybatis</artifactId>
+	  <version>3.4.1</version>      
     </dependency>
   </dependencies>
 </project>
