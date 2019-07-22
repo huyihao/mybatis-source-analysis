@@ -25,3 +25,4 @@ mybatis-3.4.1
 * (17) 构建资源加载模块`ResolverUtil`根据指定条件查找指定包下的类，依赖于`VFS`找到类的路径，`VFS`有两个实现类`DefaultVFS`、`JBoss6VFS`
 * (18) 构建数据源模块，使用工厂方法模式，实现非连接池数据源工厂`UnpooledDataSourceFactory`创建非连接池数据源`UnpooledDataSource`，带连接池数据源工厂`PooledDataSourceFactory`创建数据源连接池`PooledDataSource`
 * (19) 构建`Transaction`模块，使用工厂方法模式，实现简单JDBC管理的事务`JdbcTransaction`、容器管理的`ManagedTransaction`
+* (20) 构建`binging`模块，使用工厂模式 + 动态代理，实现mapper.xml的SQL标签(id)和Mapper接口的方法(方法名)的动态绑定，如果不匹配则会在初始化阶段报错
