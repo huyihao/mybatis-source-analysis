@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration   PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<properties resource="jdbc.properties"/>
+	
+	<!-- settings>
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+	</settings-->
+	
+	<settings>
+        <setting name="logImpl" value="log4j" /> <!-- maven项目输出debug日志设置 -->
+        <setting name="useActualParamName" value="true" />
+    </settings>
+	
+	<typeAliases> 
+		<package name="com.learn.ssm.chapter5.pojo"/>
+	</typeAliases>	
+	
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC"/>
+			<dataSource type="POOLED">
+				<property name="driver" value="${database.driver}"/>
+				<property name="url" value="${database.url}"/>
+				<property name="username" value="${database.username}"/>
+				<property name="password" value="${database.password}"/>
+			</dataSource>
+		</environment>
+	</environments>	
+	
+    <mappers>
+    	<!-- 注意：此种方法要求mapper接口名称和mapper映射文件名称相同，且放在同一个目录中。 -->
+    	<!-- package name="com.learn.ssm.chapter5.mapper"/-->
+    	<mapper resource="com/learn/ssm/chapter5/mapper/RoleMapper.xml"/>
+    </mappers>	
+</configuration>

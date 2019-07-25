@@ -12,7 +12,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
@@ -60,6 +59,7 @@ public class XPathParser {
 		commonConstructor(false, null, null);
 		this.document = createDocument(new InputSource(inputStream));
 	}
+	
 	
 	public XPathParser(Document document) {
 		commonConstructor(false, null, null);

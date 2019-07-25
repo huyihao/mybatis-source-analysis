@@ -27,3 +27,4 @@ mybatis-3.4.1
 * (19) 构建`Transaction`模块，使用工厂方法模式，实现简单JDBC管理的事务`JdbcTransaction`、容器管理的`ManagedTransaction`
 * (20) 构建`binging`模块，使用工厂模式 + 动态代理，实现mapper.xml的SQL标签(id)和Mapper接口的方法(方法名)的动态绑定，如果不匹配则会在初始化阶段报错
 * (21) 构建缓存模块，使用适配器模式，实现阻塞缓存、FIFO缓存、LRU缓存、软引用缓存、弱引用缓存、带生命周期缓存、缓存日志、同步缓存、序列化缓存，适配器模式允许多种缓存自由组合
+* (22) 构建`XMLConfigBuilder`，了解`Mybatis`解析配置文件的完整流程

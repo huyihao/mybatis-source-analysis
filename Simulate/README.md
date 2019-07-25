@@ -18,3 +18,4 @@
 * (8) 新增MetaObject的测试案例2(补充对BeanWrapper、MapWrapper、CollectionWrapper的测试)
 * (9) 新增ResolverUtil的测试案例
 * (10) 新增UnpooledDataSource和PooledDataSource的测试案例
+* (11) 新增XPathParser的测试案例
