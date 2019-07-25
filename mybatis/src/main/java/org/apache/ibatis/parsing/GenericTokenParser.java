@@ -19,10 +19,10 @@ public class GenericTokenParser {
 		final StringBuilder builder = new StringBuilder();
 		final StringBuilder expression = new StringBuilder();
 		if (text != null & text.length() > 0) {
-			char[] src = text.toCharArray();   // 将字符串转化成一个字符数组，方便解析占位符位置
-			int offset = 0;        // 初始占位符偏移量，随着对数组的遍历和查找会不断变化，偏移量之前的字符为已经处理过的数据
+			char[] src = text.toCharArray();               // 将字符串转化成一个字符数组，方便解析占位符位置
+			int offset = 0;                                // 初始占位符偏移量，随着对数组的遍历和查找会不断变化，偏移量之前的字符为已经处理过的数据
 			int start = text.indexOf(openToken, offset);   // 查找占位符开始标记位置
-			while (start > -1) {               // 大于-1证明找到了占位符标记，当对文本查找到最后一个占位符后再次搜索时也返回-1
+			while (start > -1) {                           // 大于-1证明找到了占位符标记，当对文本查找到最后一个占位符后再次搜索时也返回-1
 				// 有时候节点文本值可能有带转义占位符，表示虽然我是个占位符，但我不是用来占位用的，eg: \\${ 表示普通的"${"
 				// PS. Java中'\\'实际上只代表一个反斜杠，为了对其进行转义，所以又加了个反斜杠
 				if (start > 0 && src[start - 1] == '\\') {

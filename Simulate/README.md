@@ -19,3 +19,4 @@
 * (9) 新增ResolverUtil的测试案例
 * (10) 新增UnpooledDataSource和PooledDataSource的测试案例
 * (11) 新增XPathParser的测试案例
+* (12) 新增GenericTokenParser的测试案例
