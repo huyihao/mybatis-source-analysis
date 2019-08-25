@@ -28,3 +28,4 @@ mybatis-3.4.1
 * (20) 构建`binging`模块，使用工厂模式 + 动态代理，实现mapper.xml的SQL标签(id)和Mapper接口的方法(方法名)的动态绑定，如果不匹配则会在初始化阶段报错
 * (21) 构建缓存模块，使用适配器模式，实现阻塞缓存、FIFO缓存、LRU缓存、软引用缓存、弱引用缓存、带生命周期缓存、缓存日志、同步缓存、序列化缓存，适配器模式允许多种缓存自由组合
 * (22) 构建`XMLConfigBuilder`，了解`Mybatis`解析配置文件的完整流程
+* (23) 构建mybatis的初始化流程，Builder构造器基类定义了各具体的构造器在初始化过程中用到的一些公共操作，包括：解析字符串是否符合正则表达式、类别名解析、内建枚举类型的转化、根据配置解析获取类型转换器等；通过`XMLConfigBuilder`解析mybatis-config.xml，通过`XMLMapperBuilder`解析映射文件，通过`XMLStatementBuilder`解析mapper.xml中定义的sql标签节点

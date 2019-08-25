@@ -1,16 +1,39 @@
 package org.apache.ibatis.session;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.ibatis.binding.MapperRegistry;
+import org.apache.ibatis.builder.CacheRefResolver;
+import org.apache.ibatis.cache.Cache;
+import org.apache.ibatis.cache.decorators.FifoCache;
+import org.apache.ibatis.cache.decorators.LruCache;
+import org.apache.ibatis.cache.decorators.SoftCache;
+import org.apache.ibatis.cache.decorators.WeakCache;
+import org.apache.ibatis.cache.impl.PerpetualCache;
+import org.apache.ibatis.datasource.pooled.PooledDataSourceFactory;
+import org.apache.ibatis.datasource.unpooled.UnpooledDataSourceFactory;
 import org.apache.ibatis.executor.loader.ProxyFactory;
 import org.apache.ibatis.io.VFS;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
+import org.apache.ibatis.logging.commons.JakartaCommonsLoggingImpl;
+import org.apache.ibatis.logging.jdk14.Jdk14LoggingImpl;
+import org.apache.ibatis.logging.log4j.Log4jImpl;
+import org.apache.ibatis.logging.log4j2.Log4j2Impl;
+import org.apache.ibatis.logging.nologging.NoLoggingImpl;
+import org.apache.ibatis.logging.slf4j.Slf4jImpl;
+import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.ResultMap;
+import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.DefaultReflectorFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ReflectorFactory;
@@ -18,6 +41,9 @@ import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
+import org.apache.ibatis.session.Configuration.StrictMap;
+import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
+import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
 import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.apache.ibatis.type.JdbcType;
@@ -63,13 +89,50 @@ public class Configuration {
 	protected ObjectFactory objectFactory = new DefaultObjectFactory();           // 对象工厂
 	protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();  // 对象包装工厂
 	protected ProxyFactory proxyFactory = null;
+	protected String databaseId;
 	protected Class<?> configurationFactory;
 	
-	protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
-	protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
+	protected final MapperRegistry mapperRegistry = new MapperRegistry(this);               // Mapper 接口及其对应的代理对象工厂的注册中心
+	protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();    // 类型转换器注册中心
+	protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();          // 类型别名注册中心
+	
+	protected final Map<String, Cache> caches = new StrictMap<Cache>("Caches collection");  // 记录Cache id与Cache对象之间的对应关系
+	protected final Map<String, String> cacheRefMap = new HashMap<String, String>();        // key是<cache-ref> 节点所在的namespace，value是节点的namespace属性指定的namespace
+	protected final Map<String, ResultMap> resultMaps = new StrictMap<ResultMap>("Result Maps collection");   // mapper.xml中，<ResultMap>节点的id跟构建出来的ResultMap的映射关系
+	protected final Set<String> loadedResources = new HashSet<String>();    // 存储已经加载的Mapper resource
+	protected final Map<String, XNode> sqlFragments = new StrictMap<XNode>("XML fragments parsed from previous mappers");
+	
+	protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<CacheRefResolver>();  // 解析缓存引用出异常的CacheRefResolver
 	
 	public Configuration() {
-		
+	    typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
+	    typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
+
+	    //typeAliasRegistry.registerAlias("JNDI", JndiDataSourceFactory.class);
+	    typeAliasRegistry.registerAlias("POOLED", PooledDataSourceFactory.class);
+	    typeAliasRegistry.registerAlias("UNPOOLED", UnpooledDataSourceFactory.class);
+
+	    typeAliasRegistry.registerAlias("PERPETUAL", PerpetualCache.class);
+	    typeAliasRegistry.registerAlias("FIFO", FifoCache.class);
+	    typeAliasRegistry.registerAlias("LRU", LruCache.class);
+	    typeAliasRegistry.registerAlias("SOFT", SoftCache.class);
+	    typeAliasRegistry.registerAlias("WEAK", WeakCache.class);
+
+	    //typeAliasRegistry.registerAlias("DB_VENDOR", VendorDatabaseIdProvider.class);
+
+	    //typeAliasRegistry.registerAlias("XML", XMLLanguageDriver.class);
+	    //typeAliasRegistry.registerAlias("RAW", RawLanguageDriver.class);
+
+	    typeAliasRegistry.registerAlias("SLF4J", Slf4jImpl.class);
+	    typeAliasRegistry.registerAlias("COMMONS_LOGGING", JakartaCommonsLoggingImpl.class);
+	    typeAliasRegistry.registerAlias("LOG4J", Log4jImpl.class);
+	    typeAliasRegistry.registerAlias("LOG4J2", Log4j2Impl.class);
+	    typeAliasRegistry.registerAlias("JDK_LOGGING", Jdk14LoggingImpl.class);
+	    typeAliasRegistry.registerAlias("STDOUT_LOGGING", StdOutImpl.class);
+	    typeAliasRegistry.registerAlias("NO_LOGGING", NoLoggingImpl.class);
+
+	    //typeAliasRegistry.registerAlias("CGLIB", CglibProxyFactory.class);
+	    //typeAliasRegistry.registerAlias("JAVASSIST", JavassistProxyFactory.class);		
 	}
 	
 	// Getters & Setters
@@ -313,6 +376,102 @@ public class Configuration {
 	public TypeAliasRegistry getTypeAliasRegistry() {
 		return typeAliasRegistry;
 	}	
+	
+	public void addLoadedResource(String resource) {
+	    loadedResources.add(resource);
+	}
+
+	public boolean isResourceLoaded(String resource) {
+	    return loadedResources.contains(resource);
+	}	
+	
+	public void addCache(Cache cache) {
+		caches.put(cache.getId(), cache);
+	}
+	
+	// 获取所有Mapper的namespace
+	public Collection<String> getCacheNames() {
+		return caches.keySet();
+	}
+	
+	public Collection<Cache> getCaches() {
+		return caches.values();
+	}
+	
+	public Cache getCache(String id) {
+		return caches.get(id);
+	}
+	
+	// 检查缓存中是否已包含某个mapper(的namespace)
+	public boolean hasCache(String id) {
+		return caches.containsKey(id);
+	}
+	
+	public Map<String, XNode> getSqlFragments() {
+		return sqlFragments;
+	}
+	
+	public void addMappers(String packageName, Class<?> superType) {
+		mapperRegistry.addMappers(packageName, superType);
+	}
+	
+	public void addMappers(String packageName) {
+		mapperRegistry.addMappers(packageName);
+	}
+	
+	public <T> void addMapper(Class<T> type) {
+		mapperRegistry.addMapper(type);
+	}
+	
+	public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
+		return mapperRegistry.getMapper(type, sqlSession);
+	}
+	
+	public boolean hasMapper(Class<?> type) {
+		return mapperRegistry.hasMapper(type);
+	}
+	
+	public void addCacheRef(String namespace, String referencedNamespace) {
+		cacheRefMap.put(namespace, referencedNamespace);
+	}
+	
+	public Collection<CacheRefResolver> getIncompleteCacheRefs() {
+		return incompleteCacheRefs;
+	}
+	
+	public void addIncompleteCacheRef(CacheRefResolver incompleteCacheRef) {
+		incompleteCacheRefs.add(incompleteCacheRef);
+	}
+	
+	public void addResultMap(ResultMap rm) {
+		resultMaps.put(rm.getId(), rm);
+		//checkLocallyForDiscriminatedNestedResultMaps(rm);
+		//checkGloballyForDiscriminatedNestedResultMaps(rm);
+	}
+
+	public Collection<String> getResultMapNames() {
+		return resultMaps.keySet();
+	}
+
+	public Collection<ResultMap> getResultMaps() {
+		return resultMaps.values();
+	}
+
+	public ResultMap getResultMap(String id) {
+		return resultMaps.get(id);
+	}
+
+	public boolean hasResultMap(String id) {
+		return resultMaps.containsKey(id);
+	}
+	
+	public String getDatabaseId() {
+		return databaseId;
+	}
+
+	public void setDatabaseId(String databaseId) {
+		this.databaseId = databaseId;
+	}
 	// [end]
 
 	public MappedStatement getMappedStatement(String id) {
@@ -334,5 +493,75 @@ public class Configuration {
 	
 	public MetaObject newMetaObject(Object object) {
 		return null;
+	}
+	
+	protected static class StrictMap<V> extends HashMap<String, V> {
+		
+		private static final long serialVersionUID = -7417525687823583926L;
+		private final String name;
+		
+		public StrictMap(String name, int initialCapacity, float loadFactor) {
+			super(initialCapacity, loadFactor);
+			this.name = name;
+		}
+		
+		public StrictMap(String name, int initialCapacity) {
+			super(initialCapacity);
+			this.name = name;
+		}
+		
+		public StrictMap(String name) {
+			super();
+			this.name = name;
+		}
+		
+		public StrictMap(String name, Map<String, ? extends V> m) {
+			super(m);
+			this.name = name;
+		}
+		
+		// [特别注意]: 对于带'\\'或'.'的key，这里实际上put了两次
+		@SuppressWarnings("unchecked")
+		public V put(String key, V value) {
+			if (containsKey(key)) {   // 如果包含了该key，则直接返回异常
+				throw new IllegalArgumentException(name + " already contains value for " + key);
+			}
+			if (key.contains(".")) {
+				/**
+				 * 按照"."将key切分成数组，并将数组的最后一项作为shortKey
+				 * 加入shortKey在Map中能找到，证明存在二义性
+				 * eg:
+				 * 	 com.haha.UserMapper、com.hehe.UserMapper
+				 * 的shortKey都是"UserMapper"，后插入的Mapper插入
+				 * shortKey和映射的对象时就会存在二义性，这里插入一个Ambiguity
+				 * 对象表示这种情况
+				 */
+				final String shortKey = getShortName(key);
+				if (super.get(shortKey) == null) {
+					super.put(shortKey, value);
+				} else {
+					super.put(shortKey, (V) new Ambiguity(shortKey));
+				}
+			}
+			return super.put(key, value);
+		}
+		
+		private String getShortName(String key) {
+			final String[] keyParts = key.split("\\.");
+			return keyParts[keyParts.length - 1];
+		}
+		
+		// Ambiguity表示的是存在二义性的键值对，subject字段记录了存在二义性的key
+		protected static class Ambiguity {
+			final private String subject;
+			
+			public Ambiguity(String subject) {
+				this.subject = subject;
+			}
+			
+			public String getSubject() {
+				return subject;
+			}
+		}
 	}
 }

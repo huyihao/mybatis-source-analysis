@@ -15,9 +15,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 /**
  * 统计指定路径下面jar包文件中所有*.class 文件的代码行数
- * @author aflyun
- * @date 2016.02.16
- * @version 1.0
  */
 public class JarTotal {
  

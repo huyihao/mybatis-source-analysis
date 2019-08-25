@@ -29,6 +29,10 @@ import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.type.JdbcType;
 
+/**
+ * BaseBuilder的子类
+ * 负责解析mybatis-config.xml配置文件
+ */
 public class XMLConfigBuilder extends BaseBuilder {
 
 	private boolean parsed;       // 标识是否已经解析过mybatis-config.xml配置文件
@@ -458,7 +462,8 @@ public class XMLConfigBuilder extends BaseBuilder {
 	 *		<!-- 使用包扫描的方式加载 -->
 	 *		<package name="com.learn.ssm.chapter4.typeHandler"/>
 	 * </typeHandlers>
-	 * @param parent
+	 * 
+	 * 允许同时使用包扫描加逐个定义的方式
 	 */
 	private void typeHandlerElement(XNode parent) {
 		if (parent != null) {
@@ -512,12 +517,11 @@ public class XMLConfigBuilder extends BaseBuilder {
      *		<mapper class="com.learn.ssm.chapter4.mapperInterface.UserMapper2"/>
      *	
      *		<!-- (4) 使用文件的绝对路径引入映射器 -->
-     *		<!-- mapper url="F:\mybatis\workspace\mybatis-chapter4\src\main\java\com\learn\ssm\chapter4\mapper\FileMapper.xml"/>
+     *		<mapper url="F:\mybatis\workspace\mybatis-chapter4\src\main\java\com\learn\ssm\chapter4\mapper\FileMapper.xml"/>
      *		<mapper url="F:\mybatis\workspace\mybatis-chapter4\src\main\java\com\learn\ssm\chapter4\mapper\RoleMapper.xml"/>
      *		<mapper url="F:\mybatis\workspace\mybatis-chapter4\src\main\java\com\learn\ssm\chapter4\mapper\UserMapper.xml"/>
      *		<mapper url="F:\mybatis\workspace\mybatis-chapter4\src\main\java\com\learn\ssm\chapter4\mapper\UserMapper2.xml"/>
      *  </mappers>
-	 * @param parent
 	 */
 	private void mapperElement(XNode parent) throws Exception {
 		if (parent != null) {
@@ -525,19 +529,26 @@ public class XMLConfigBuilder extends BaseBuilder {
 				if ("package".equals(child.getName())) {
 					// 扫描指定的包，并向MapperRegistry注册Mapper接口
 					String mapperPackage = child.getStringAttribute("name");
-					// configuration.addMappers(mapperPackage);
+					configuration.addMappers(mapperPackage);
 				} else {
 					// 获取<mapper>节点的resource、url、class属性，这三个属性互斥
 					String resource = child.getStringAttribute("resource");
 					String url = child.getStringAttribute("url");
 					String mapperClass = child.getStringAttribute("class");
+					// 如果<mapper>节点指定了resource或是url属性，则创建XMLMapperBuilder对象
+					// 并通过该对象解析resource或是url属性指定的Mapper配置文件
 					if (resource != null && url == null && mapperClass == null) {
 						InputStream inputStream = Resources.getResourceAsStream(resource);
+						XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
+						mapperParser.parse();
 					} else if (resource == null && url != null && mapperClass == null) {
 						InputStream inputStream = Resources.getUrlAsStream(url);
+						XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url, configuration.getSqlFragments());
+						mapperParser.parse();
 					} else if (resource == null && url == null && mapperClass != null) {
+						// 如果<mapper>节点指定了class属性，则向MapperRegistry注册该Mapper接口
 						Class<?> mapperInterface = Resources.classForName(mapperClass);
-						
+						configuration.addMapper(mapperInterface);
 					} else {
 						// 假如三个属性都没有，或者同时设了两个属性，那么都会走到这里抛出异常
 						throw new BuilderException("A mapper element may only specify a url, resource or class, but not more than one.");

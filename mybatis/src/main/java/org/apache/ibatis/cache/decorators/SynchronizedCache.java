@@ -14,6 +14,10 @@ public class SynchronizedCache implements Cache {
 
 	private Cache delegate;
 	
+	public SynchronizedCache(Cache delegate) {
+		this.delegate = delegate;
+	}
+	
 	@Override
 	public String getId() {
 		return delegate.getId();
