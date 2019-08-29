@@ -2,7 +2,7 @@ package org.apache.ibatis.mapping;
 
 import java.util.List;
 
-import org.apache.ibatis.binding.SqlCommandType;
+import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.session.Configuration;
 
@@ -11,15 +11,15 @@ import org.apache.ibatis.session.Configuration;
  */
 public final class MappedStatement {
 
-	private String resource;
-	private Configuration configuration;
+	private String resource;				// 节点的id属性（包括命名空间前缀）
+	private Configuration configuration;    
 	private String id;
 	private Integer fetchSize;
 	private Integer timeout;
 	private StatementType statementType;
 	private ResultSetType resultSetType;
-	
-	
+	private SqlSource sqlSource;            // SqlSource对象，对应一条SQL语句
+	private Cache cache;                    // Sql查询结果缓存
 	
 	private List<ResultMap> resultMaps;
 	private boolean flushCacheRequired;
@@ -36,6 +36,10 @@ public final class MappedStatement {
 	private String[] resultSets;
 	
 	MappedStatement() {}
+	
+	public static class Builder {
+		private MappedStatement mappedStatement = new MappedStatement();
+	}
 	
 	public SqlCommandType getSqlCommandType() {
 	    return sqlCommandType;

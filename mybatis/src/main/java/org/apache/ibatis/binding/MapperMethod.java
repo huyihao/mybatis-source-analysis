@@ -12,6 +12,7 @@ import org.apache.ibatis.annotations.Flush;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.reflection.TypeParameterResolver;
@@ -229,7 +230,7 @@ public class MapperMethod {
 			} else {
 				name = ms.getId();   // 初始化name和type
 				type = ms.getSqlCommandType();
-				if (type == SqlCommandType.UNKNOW) {
+				if (type == SqlCommandType.UNKNOWN) {
 					throw new BindingException("Unknown execution method for: " + name);
 				}
 			}

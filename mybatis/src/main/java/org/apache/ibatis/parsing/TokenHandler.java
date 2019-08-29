@@ -6,5 +6,5 @@ package org.apache.ibatis.parsing;
  *
  */
 public interface TokenHandler {
-	String handleToken(String context);
+	String handleToken(String content);
 }

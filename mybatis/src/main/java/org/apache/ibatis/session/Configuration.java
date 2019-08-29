@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.apache.ibatis.binding.MapperRegistry;
 import org.apache.ibatis.builder.CacheRefResolver;
+import org.apache.ibatis.builder.xml.XMLStatementBuilder;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.decorators.FifoCache;
 import org.apache.ibatis.cache.decorators.LruCache;
@@ -32,6 +33,7 @@ import org.apache.ibatis.logging.slf4j.Slf4jImpl;
 import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.ParameterMap;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.reflection.DefaultReflectorFactory;
@@ -41,7 +43,10 @@ import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
-import org.apache.ibatis.session.Configuration.StrictMap;
+import org.apache.ibatis.scripting.LanguageDriver;
+import org.apache.ibatis.scripting.LanguageDriverRegistry;
+import org.apache.ibatis.scripting.defaults.RawSqlSource;
+import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
 import org.apache.ibatis.type.TypeAliasRegistry;
@@ -95,14 +100,18 @@ public class Configuration {
 	protected final MapperRegistry mapperRegistry = new MapperRegistry(this);               // Mapper 接口及其对应的代理对象工厂的注册中心
 	protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();    // 类型转换器注册中心
 	protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();          // 类型别名注册中心
+	protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry(); // LanguageDriver注册中心
 	
+	protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>("Mapped Statements collection");
 	protected final Map<String, Cache> caches = new StrictMap<Cache>("Caches collection");  // 记录Cache id与Cache对象之间的对应关系
 	protected final Map<String, String> cacheRefMap = new HashMap<String, String>();        // key是<cache-ref> 节点所在的namespace，value是节点的namespace属性指定的namespace
 	protected final Map<String, ResultMap> resultMaps = new StrictMap<ResultMap>("Result Maps collection");   // mapper.xml中，<ResultMap>节点的id跟构建出来的ResultMap的映射关系
+	protected final Map<String, ParameterMap> parameterMaps = new StrictMap<ParameterMap>("Parameter Maps collection");  // mapper.xml中，<parameterMap>节点的id跟构建出来的ResultMap的映射关系
 	protected final Set<String> loadedResources = new HashSet<String>();    // 存储已经加载的Mapper resource
 	protected final Map<String, XNode> sqlFragments = new StrictMap<XNode>("XML fragments parsed from previous mappers");
 	
 	protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<CacheRefResolver>();  // 解析缓存引用出异常的CacheRefResolver
+	protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<XMLStatementBuilder>();
 	
 	public Configuration() {
 	    typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
@@ -120,7 +129,7 @@ public class Configuration {
 
 	    //typeAliasRegistry.registerAlias("DB_VENDOR", VendorDatabaseIdProvider.class);
 
-	    //typeAliasRegistry.registerAlias("XML", XMLLanguageDriver.class);
+	    typeAliasRegistry.registerAlias("XML", XMLLanguageDriver.class);
 	    //typeAliasRegistry.registerAlias("RAW", RawLanguageDriver.class);
 
 	    typeAliasRegistry.registerAlias("SLF4J", Slf4jImpl.class);
@@ -132,7 +141,10 @@ public class Configuration {
 	    typeAliasRegistry.registerAlias("NO_LOGGING", NoLoggingImpl.class);
 
 	    //typeAliasRegistry.registerAlias("CGLIB", CglibProxyFactory.class);
-	    //typeAliasRegistry.registerAlias("JAVASSIST", JavassistProxyFactory.class);		
+	    //typeAliasRegistry.registerAlias("JAVASSIST", JavassistProxyFactory.class);
+	    
+	    languageRegistry.setDefaultDriverClass(XMLLanguageDriver.class);
+	    //languageRegistry.register(RawLanguageDriver.class);
 	}
 	
 	// Getters & Setters
@@ -472,17 +484,74 @@ public class Configuration {
 	public void setDatabaseId(String databaseId) {
 		this.databaseId = databaseId;
 	}
-	// [end]
+	
+	public void addParameterMap(ParameterMap pm) {
+		parameterMaps.put(pm.getId(), pm);
+	}
 
-	public MappedStatement getMappedStatement(String id) {
-		return null;
-	}	
+	public Collection<String> getParameterMapNames() {
+		return parameterMaps.keySet();
+	}
+
+	public Collection<ParameterMap> getParameterMaps() {
+		return parameterMaps.values();
+	}
+
+	public ParameterMap getParameterMap(String id) {
+		return parameterMaps.get(id);
+	}
+
+	public boolean hasParameterMap(String id) {
+		return parameterMaps.containsKey(id);
+	}
 	
 	// 根据SQL语句的名称，检测配置是否有加载该SQL
 	public boolean hasStatement(String statementName) {
-		return true;
+		return hasStatement(statementName, true);
+	}
+
+	public boolean hasStatement(String statementName, boolean validateIncompleteStatements) {
+		if (validateIncompleteStatements) {
+			//buildAllStatements();
+		}
+		return mappedStatements.containsKey(statementName);
 	}
 	
+	public MappedStatement getMappedStatement(String id) {
+		return this.getMappedStatement(id, true);
+	}
+
+	public MappedStatement getMappedStatement(String id, boolean validateIncompleteStatements) {
+		if (validateIncompleteStatements) {
+			//buildAllStatements();
+		}
+		return mappedStatements.get(id);
+	}
+	
+	public Collection<XMLStatementBuilder> getIncompleteStatements() {
+		return incompleteStatements;
+	}
+	
+	public void addIncompleteStatement(XMLStatementBuilder incompleteStatement) {
+		incompleteStatements.add(incompleteStatement);
+	}
+	
+	public LanguageDriverRegistry getLanguageRegistry() {
+		return languageRegistry;
+	}
+
+	public void setDefaultScriptingLanguage(Class<?> driver) {
+		if (driver == null) {
+			driver = XMLLanguageDriver.class;
+		}
+		getLanguageRegistry().setDefaultDriverClass(driver);
+	}
+
+	public LanguageDriver getDefaultScriptingLanuageInstance() {
+		return languageRegistry.getDefaultDriver();
+	}
+	// [end]	
+
 	public boolean isUseActualParamName() {
 		return true;
 	}
@@ -492,7 +561,7 @@ public class Configuration {
 	}
 	
 	public MetaObject newMetaObject(Object object) {
-		return null;
+		return MetaObject.forObject(object, objectFactory, objectWrapperFactory, reflectorFactory);
 	}
 	
 	protected static class StrictMap<V> extends HashMap<String, V> {

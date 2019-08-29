@@ -17,6 +17,8 @@ import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.builder.ResultMapResolver;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.mapping.Discriminator;
+import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.ResultFlag;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
@@ -98,13 +100,13 @@ public class XMLMapperBuilder extends BaseBuilder {
 			// 解析 <cache> 节点
 			cacheElement(context.evalNode("cache"));
 			// 解析 <parameterMap> 节点（官方声明已作废！）
-			
+			parameterMapElement(context.evalNodes("/mapper/parameterMap"));
 			// 解析 <resultMap> 节点
 			resultMapElements(context.evalNodes("/mapper/resultMap"));
 			// 解析 <sql> 节点
 			sqlElement(context.evalNodes("/mapper/sql"));
 			// 解析 <select>、<insert>、<update>、<delete> 等SQL节点
-			
+			buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
 		} catch (Exception e) {
 			throw new BuilderException("Error parsing Mapper XML. Cause: " + e, e);
 		}
@@ -198,6 +200,40 @@ public class XMLMapperBuilder extends BaseBuilder {
 		}
 	}
 
+	/**
+	 * [解析parameterMap节点]
+	 * <parameterMap id="" type="">
+	 *     <parameter property="" javaType="" jdbcType="" resultMap="" mode="" typeHandler="" numericScale=""></parameter>
+	 *     <parameter></parameter>
+	 * </parameterMap>
+	 */
+	private void parameterMapElement(List<XNode> list) {
+		for (XNode parameterMapNode : list) {
+			String id = parameterMapNode.getStringAttribute("id");
+			String type = parameterMapNode.getStringAttribute("type");
+			Class<?> parameterClass = resolveClass(type);
+			List<XNode> parameterNodes = parameterMapNode.evalNodes("parameter");
+			List<ParameterMapping> parameterMappings = new ArrayList<ParameterMapping>();
+			for (XNode parameterNode : parameterNodes) {
+				String property = parameterNode.getStringAttribute("property");
+				String javaType = parameterNode.getStringAttribute("javaType");
+				String jdbcType = parameterNode.getStringAttribute("jdbcType");
+				String resultMap = parameterNode.getStringAttribute("resultMap");
+		        String mode = parameterNode.getStringAttribute("mode");
+		        String typeHandler = parameterNode.getStringAttribute("typeHandler");
+		        Integer numericScale = parameterNode.getIntAttribute("numericScale");
+		        ParameterMode modeEnum = resolveParameterMode(mode);
+		        Class<?> javaTypeClass = resolveClass(javaType);
+		        JdbcType jdbcTypeEnum = resolveJdbcType(jdbcType);
+		        @SuppressWarnings("unchecked")
+		        Class<? extends TypeHandler<?>> typeHandlerClass = (Class<? extends TypeHandler<?>>) resolveClass(typeHandler);
+		        ParameterMapping parameterMapping = builderAssistant.buildParameterMapping(parameterClass, property, javaTypeClass, jdbcTypeEnum, resultMap, modeEnum, typeHandlerClass, numericScale);
+		        parameterMappings.add(parameterMapping);
+			}
+			builderAssistant.addParameterMap(id, parameterClass, parameterMappings);
+		}
+	}
+	
 	// 同个mapper.xml中可能存在多个 <resultMap> 节点，所以这里的参数是一个List
 	private void resultMapElements(List<XNode> list) throws Exception {
 		for (XNode resultMapNode : list) {
@@ -482,4 +518,22 @@ public class XMLMapperBuilder extends BaseBuilder {
 		return null;
 	}
 
+	// 通过mapper.xml的上下文构建Statament对象
+	private void buildStatementFromContext(List<XNode> list) {
+		if (configuration.getDatabaseId() != null) {
+			buildStatementFromContext(list, configuration.getDatabaseId());
+		}
+		buildStatementFromContext(list, null);
+	}
+	
+	private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
+		for (XNode context : list) {
+			final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context, requiredDatabaseId);
+			try {
+				statementParser.parseStatementNode();	
+			} catch (IncompleteElementException e) {
+				configuration.addIncompleteStatement(statementParser);
+			}
+		}
+	}
 }
